@@ -1,7 +1,7 @@
 /* Service worker: precache totale, strategia cache-first.
    Dopo la prima apertura l'app funziona senza rete.
    Cambia VERSIONE a ogni rigenerazione dell'orario: forza l'aggiornamento. */
-const VERSIONE = "orari-fse-2026-07-06";
+const VERSIONE = "orari-fse-20260711-0828";";
 const RISORSE = [
   "./",
   "./index.html",
