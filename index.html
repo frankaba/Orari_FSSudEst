@@ -77,6 +77,30 @@ input,select{
 }
 input:hover,select:hover{border-color:var(--grigio-2)}
 input:focus,select:focus{outline:0;border-color:var(--rosso);box-shadow:0 0 0 3px var(--rosso-tenue)}
+.campo{position:relative}
+.proposte{
+  position:absolute;z-index:40;left:0;right:0;top:100%;margin-top:3px;
+  background:#fff;border:1px solid var(--filo);border-radius:3px;
+  box-shadow:0 8px 24px rgba(20,22,26,.14);
+  max-height:290px;overflow-y:auto;-webkit-overflow-scrolling:touch;
+}
+.proposte[hidden]{display:none}
+.proposta{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  width:100%;text-align:left;background:none;border:0;cursor:pointer;
+  padding:12px 14px;font:inherit;color:var(--inchiostro);
+  border-bottom:1px solid var(--filo-2);
+}
+.proposta:last-child{border-bottom:0}
+.proposta:hover,.proposta.attiva{background:var(--fondo-2)}
+.proposta.loc{background:var(--rosso-tenue);font-weight:600}
+.proposta.loc:hover,.proposta.loc.attiva{background:#F6DDE0}
+.proposta .conta{
+  flex:none;font-family:var(--mono);font-size:11px;color:var(--rosso);
+  border:1px solid var(--rosso-filo);border-radius:2px;padding:1px 6px;background:#fff;
+}
+.proposta em{font-style:normal;background:#FDE9A9;border-radius:2px}
+.proposte .vuota{padding:12px 14px;font-size:13px;color:var(--grigio-2)}
 .suggerimento{margin:7px 0 0;font-size:12px;color:var(--grigio-2);line-height:1.5}
 .suggerimento b{color:var(--grigio);font-weight:600}
 .riga-3{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:12px}
@@ -197,6 +221,24 @@ input:focus,select:focus{outline:0;border-color:var(--rosso);box-shadow:0 0 0 3p
 .scelte button.agg{background:var(--rosso);border-color:var(--rosso);color:#fff;font-weight:600}
 .scelte button.agg:hover{background:var(--rosso-cupo);color:#fff}
 
+#banner{
+  position:fixed;left:0;right:0;bottom:0;z-index:90;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:14px 18px calc(14px + env(safe-area-inset-bottom));
+  background:var(--inchiostro);color:#fff;font-size:14px;
+  box-shadow:0 -6px 24px rgba(20,22,26,.28);
+}
+#banner[hidden]{display:none}
+#banner button{
+  flex:none;background:var(--rosso);color:#fff;border:0;border-radius:3px;
+  padding:9px 16px;font:inherit;font-weight:600;cursor:pointer;
+}
+#banner button:hover{background:var(--rosso-cupo)}
+.versione{
+  display:inline-block;margin-top:12px;padding:3px 8px;border:1px solid var(--filo);
+  border-radius:2px;font-family:var(--mono);font-size:11px;color:var(--grigio-2);
+}
+.versione b{color:var(--inchiostro);font-weight:600}
 footer{
   margin:44px 0 0;border-top:3px solid var(--rosso);padding:16px 0 40px;
   font-size:12px;color:var(--grigio);line-height:1.7;
@@ -230,13 +272,17 @@ footer .cifre{font-family:var(--mono);color:var(--grigio-2)}
 <form id="f-tratta" onsubmit="return false">
   <div class="campo">
     <label for="da">Parti da</label>
-    <input id="da" list="l-fermate" placeholder="es. Maglie, oppure Bari &middot; tutte le fermate" autocomplete="off" enterkeyhint="search">
-    <p class="suggerimento">Le citt&agrave; con pi&ugrave; fermate (Bari, Taranto, Lecce&hellip;) hanno in cima
-      all&rsquo;elenco una voce <b>&laquo;tutte le fermate&raquo;</b> che le cerca insieme.</p>
+    <input id="da" placeholder="Tocca per scegliere, o scrivi" autocomplete="off"
+           enterkeyhint="search" role="combobox" aria-expanded="false" aria-autocomplete="list">
+    <div class="proposte" id="p-da" role="listbox" hidden></div>
+    <p class="suggerimento">Le citt&agrave; con pi&ugrave; fermate hanno in cima una voce
+      <b>&laquo;tutte le fermate&raquo;</b> che le cerca insieme.</p>
   </div>
   <div class="campo">
     <label for="a">Arrivi a</label>
-    <input id="a" list="l-fermate" placeholder="es. Otranto" autocomplete="off" enterkeyhint="search">
+    <input id="a" placeholder="Tocca per scegliere, o scrivi" autocomplete="off"
+           enterkeyhint="search" role="combobox" aria-expanded="false" aria-autocomplete="list">
+    <div class="proposte" id="p-a" role="listbox" hidden></div>
     <button type="button" class="inverti" id="inverti">&#8646; Inverti</button>
   </div>
   <div class="riga-3">
@@ -259,14 +305,13 @@ footer .cifre{font-family:var(--mono);color:var(--grigio-2)}
 <form id="f-corsa" hidden onsubmit="return false">
   <div class="campo">
     <label for="codice">Codice corsa</label>
-    <input id="codice" list="l-codici" placeholder="es. 41015" autocomplete="off" enterkeyhint="search">
+    <input id="codice" placeholder="es. 41015" autocomplete="off"
+           enterkeyhint="search" role="combobox" aria-expanded="false" aria-autocomplete="list">
+    <div class="proposte" id="p-codice" role="listbox" hidden></div>
   </div>
   <div class="campo"><label for="data3">Giorno</label><input type="date" id="data3"></div>
   <button class="azione" id="cerca3">Apri la corsa</button>
 </form>
-
-<datalist id="l-fermate"></datalist>
-<datalist id="l-codici"></datalist>
 
 <div id="esito"></div>
 
@@ -279,8 +324,14 @@ footer .cifre{font-family:var(--mono);color:var(--grigio-2)}
   <b>Da confermare con FSE:</b> la corrispondenza settimana A/B non &egrave; dichiarata per il
   2026 (la legenda del P.d.E. la definisce solo per il 2023). Qui A = settimana ISO pari.
   Riguarda <b id="nab"></b> corse, segnalate nel dettaglio.<br><br>
-  Solo corse dirette, nessuna coincidenza calcolata. Funziona senza connessione.
+  Solo corse dirette, nessuna coincidenza calcolata. Funziona senza connessione.<br>
+  <span class="versione">versione <b>2026-07-11 08:28</b></span>
 </footer>
+
+<div id="banner" hidden>
+  <span>&Egrave; disponibile una versione aggiornata dell&rsquo;orario.</span>
+  <button id="aggiorna">Aggiorna</button>
+</div>
 
 </div>
 <script>
@@ -432,6 +483,104 @@ function percorso(ci, d, evid){
     </div>${soste}</div>`;
 }
 
+/* ---------- elenco proposte (sostituisce il datalist, inaffidabile su mobile) ---------- */
+const senzaAccenti = t => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+function evidenzia(testo, q){
+  if (!q) return testo;
+  const i = senzaAccenti(testo).indexOf(senzaAccenti(q));
+  if (i < 0) return testo;
+  return testo.slice(0,i) + "<em>" + testo.slice(i, i+q.length) + "</em>" + testo.slice(i+q.length);
+}
+
+/* Localita' sempre in cima, poi le fermate: prima quelle che iniziano con il testo
+   digitato, poi quelle che lo contengono. A campo vuoto mostra tutte le localita'. */
+function proposteLuogo(q){
+  const t = senzaAccenti(q.trim());
+  const out = [];
+
+  D.localita.forEach(l => {
+    if (!t || senzaAccenti(l.n).includes(t))
+      out.push({v:etichettaLoc(l),
+                h:evidenzia(l.n, q.trim()) + " \u00b7 tutte le fermate",
+                conta:`${l.f.length} fermate`, loc:true});
+  });
+  if (!t) return out;
+
+  const inizia = [], contiene = [];
+  D.fermate.forEach(n => {
+    const x = senzaAccenti(n);
+    if (x.startsWith(t)) inizia.push(n);
+    else if (x.includes(t)) contiene.push(n);
+  });
+  [...inizia, ...contiene].slice(0, 40).forEach(n =>
+    out.push({v:n, h:evidenzia(n, q.trim()), conta:"", loc:false}));
+  return out;
+}
+
+function proposteCodice(q){
+  const t = q.trim().toLowerCase();
+  const cod = [...perCodice.keys()].sort();
+  return (t ? cod.filter(c => c.toLowerCase().includes(t)) : cod.slice(0, 30))
+    .slice(0, 40)
+    .map(c => ({v:c, h:evidenzia(c, q.trim()), conta:"", loc:false}));
+}
+
+function collegaProposte(idInput, idLista, sorgente, azione){
+  const inp = document.getElementById(idInput);
+  const box = document.getElementById(idLista);
+  let voci = [], sel = -1;
+
+  const chiudi = () => {
+    box.hidden = true; sel = -1;
+    inp.setAttribute("aria-expanded", "false");
+  };
+  const disegna = () => {
+    voci = sorgente(inp.value);
+    box.innerHTML = voci.length
+      ? voci.map((v,i) =>
+          `<button type="button" class="proposta${v.loc ? " loc" : ""}" role="option" data-i="${i}">
+             <span>${v.h}</span>${v.conta ? `<span class="conta">${v.conta}</span>` : ""}
+           </button>`).join("")
+      : `<div class="vuota">Nessun risultato per \u201c${inp.value.trim()}\u201d</div>`;
+    box.hidden = false; sel = -1; box.scrollTop = 0;
+    inp.setAttribute("aria-expanded", "true");
+  };
+  const scegli = i => {
+    if (i < 0 || i >= voci.length) return;
+    inp.value = voci[i].v;
+    chiudi();
+    azione();
+  };
+
+  inp.addEventListener("focus", disegna);
+  inp.addEventListener("input", disegna);
+  inp.addEventListener("keydown", e => {
+    if (box.hidden) return;
+    if (e.key === "ArrowDown" || e.key === "ArrowUp"){
+      e.preventDefault();
+      sel = (sel + (e.key === "ArrowDown" ? 1 : -1) + voci.length) % voci.length;
+      box.querySelectorAll(".proposta").forEach((b,i) => b.classList.toggle("attiva", i === sel));
+      const att = box.querySelector(".attiva");
+      if (att) att.scrollIntoView({block:"nearest"});
+    } else if (e.key === "Enter" && sel >= 0){
+      e.preventDefault(); scegli(sel);
+    } else if (e.key === "Escape"){
+      chiudi();
+    }
+  });
+  /* pointerdown e non click: il blur dell'input chiuderebbe la lista prima del click */
+  box.addEventListener("pointerdown", e => {
+    const b = e.target.closest(".proposta");
+    if (!b) return;
+    e.preventDefault();
+    scegli(+b.dataset.i);
+  });
+  document.addEventListener("pointerdown", e => {
+    if (!box.contains(e.target) && e.target !== inp) chiudi();
+  });
+}
+
 function cercaTratta(){
   const d = daIso(document.getElementById("data").value);
   const rp = risolviLuogo(document.getElementById("da").value);
@@ -569,15 +718,16 @@ document.getElementById("inverti").onclick = () => {
   if (a.value && b.value) cercaTratta();
 };
 ["da","a","codice"].forEach(id => document.getElementById(id).addEventListener("keydown", e => {
-  if (e.key === "Enter"){ e.preventDefault(); (id === "codice" ? cercaCorsa : cercaTratta)(); }
+  if (e.key === "Enter" && document.getElementById("p-" + id).hidden){
+    e.preventDefault();
+    (id === "codice" ? cercaCorsa : cercaTratta)();
+  }
 }));
 
 (function(){
-  document.getElementById("l-fermate").innerHTML =
-    D.localita.map(l => `<option value="${etichettaLoc(l)}">`).join("") +
-    D.fermate.map(n => `<option value="${n}">`).join("");
-  document.getElementById("l-codici").innerHTML =
-    [...perCodice.keys()].sort().map(c => `<option value="${c}">`).join("");
+  collegaProposte("da", "p-da", proposteLuogo, cercaTratta);
+  collegaProposte("a", "p-a", proposteLuogo, cercaTratta);
+  collegaProposte("codice", "p-codice", proposteCodice, cercaCorsa);
   document.getElementById("linea").innerHTML = D.linee
     .map((l,i) => ({l,i}))
     .sort((x,y) => x.l[0].localeCompare(y.l[0],"it",{numeric:true}) || x.l[1].localeCompare(y.l[1]))
@@ -606,7 +756,33 @@ document.getElementById("inverti").onclick = () => {
   /* Service worker: rende la pagina installabile e disponibile offline.
      Se il file e' aperto da disco (file://) non serve e non viene registrato. */
   if ("serviceWorker" in navigator && location.protocol.startsWith("http")){
-    navigator.serviceWorker.register("sw.js").catch(() => {});
+    navigator.serviceWorker.register("sw.js").then(reg => {
+
+      /* Un nuovo sw installato mentre uno vecchio ha ancora il controllo
+         significa che su GitHub c'e' una versione piu' recente. */
+      const proponi = sw => sw.addEventListener("statechange", () => {
+        if (sw.state === "installed" && navigator.serviceWorker.controller)
+          document.getElementById("banner").hidden = false;
+      });
+      if (reg.waiting && navigator.serviceWorker.controller)
+        document.getElementById("banner").hidden = false;
+      reg.addEventListener("updatefound", () => reg.installing && proponi(reg.installing));
+
+      document.getElementById("aggiorna").onclick = () => {
+        const sw = reg.waiting || reg.installing;
+        if (sw) sw.postMessage("aggiorna"); else location.reload();
+      };
+
+      /* quando il nuovo sw prende il controllo, ricarica una volta sola */
+      let ricaricato = false;
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        if (ricaricato) return;
+        ricaricato = true;
+        location.reload();
+      });
+
+      reg.update().catch(() => {});
+    }).catch(() => {});
   }
 })();
 </script>
