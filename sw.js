@@ -2,7 +2,7 @@
    GENERATO da gen_html.py: non modificarlo a mano, verrebbe sovrascritto.
    La versione e' agganciata al momento della generazione, quindi ogni rigenerazione
    invalida da sola la cache dei telefoni: non c'e' niente da ricordarsi di cambiare. */
-const VERSIONE = "orari-fse-20260711-0828";
+const VERSIONE = "orari-fse-20260711-0855";
 const RISORSE = [
   "./",
   "./index.html",

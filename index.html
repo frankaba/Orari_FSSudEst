@@ -82,14 +82,19 @@ input:focus,select:focus{outline:0;border-color:var(--rosso);box-shadow:0 0 0 3p
   position:absolute;z-index:40;left:0;right:0;top:100%;margin-top:3px;
   background:#fff;border:1px solid var(--filo);border-radius:3px;
   box-shadow:0 8px 24px rgba(20,22,26,.14);
-  max-height:290px;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  max-height:min(50vh,320px);
+  overflow-y:auto;overscroll-behavior:contain;
+  touch-action:pan-y;                 /* il dito deve poter scorrere la lista */
+  -webkit-overflow-scrolling:touch;   /* inerzia su iOS */
 }
 .proposte[hidden]{display:none}
 .proposta{
   display:flex;align-items:center;justify-content:space-between;gap:10px;
   width:100%;text-align:left;background:none;border:0;cursor:pointer;
-  padding:12px 14px;font:inherit;color:var(--inchiostro);
+  padding:13px 14px;font:inherit;color:var(--inchiostro);
   border-bottom:1px solid var(--filo-2);
+  touch-action:pan-y;                 /* scorre, non blocca */
+  -webkit-tap-highlight-color:transparent;
 }
 .proposta:last-child{border-bottom:0}
 .proposta:hover,.proposta.attiva{background:var(--fondo-2)}
@@ -325,7 +330,7 @@ footer .cifre{font-family:var(--mono);color:var(--grigio-2)}
   2026 (la legenda del P.d.E. la definisce solo per il 2023). Qui A = settimana ISO pari.
   Riguarda <b id="nab"></b> corse, segnalate nel dettaglio.<br><br>
   Solo corse dirette, nessuna coincidenza calcolata. Funziona senza connessione.<br>
-  <span class="versione">versione <b>2026-07-11 08:28</b></span>
+  <span class="versione">versione <b>2026-07-11 08:55</b></span>
 </footer>
 
 <div id="banner" hidden>
@@ -569,13 +574,14 @@ function collegaProposte(idInput, idLista, sorgente, azione){
       chiudi();
     }
   });
-  /* pointerdown e non click: il blur dell'input chiuderebbe la lista prima del click */
-  box.addEventListener("pointerdown", e => {
+  /* click, non pointerdown: preventDefault su pointerdown annullerebbe il gesto di
+     scorrimento del dito e la lista risulterebbe bloccata sul touch.
+     La lista non si chiude sul blur, quindi il click arriva sempre a destinazione. */
+  box.addEventListener("click", e => {
     const b = e.target.closest(".proposta");
-    if (!b) return;
-    e.preventDefault();
-    scegli(+b.dataset.i);
+    if (b) scegli(+b.dataset.i);
   });
+  /* chiusura solo toccando fuori: si usa pointerdown senza preventDefault */
   document.addEventListener("pointerdown", e => {
     if (!box.contains(e.target) && e.target !== inp) chiudi();
   });
